@@ -5,6 +5,8 @@ use json;
 use std::env;
 use std::format;
 use colored::*;
+use std::fs;
+use std::io::Write;
 
 struct WeatherIcon {
     code: String,
@@ -26,6 +28,22 @@ fn print_weather(info: &WeatherInfo) {
     println!("Temp: {}", info.temperature.green());
     println!("Feels Like: {}", info.feels_like.green());
 
+}
+
+fn add_to_bashrc() {
+    let bashrc_path = env::var("BASHRC_PATH").unwrap_or_else(|_| String::from("$HOME/.bashrc"));
+    let contents = fs::read_to_string(&bashrc_path).expect("File Read failed");
+    if !contents.contains("good_morning") {
+        let mut file = fs::OpenOptions::new()
+        .write(true)
+        .append(true) // This is needed to append to file
+        .open(&bashrc_path)
+        .unwrap();
+
+        let mut good_morning_executable = format!("{}", std::env::current_dir().unwrap().display());
+        good_morning_executable = String::from("cd ") + &good_morning_executable + "/target/release\n./good_morning \ncd $HOME";
+        file.write_all(good_morning_executable.as_bytes()).expect("BASH RC write failex");
+    }
 }
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -76,6 +94,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         location: String::from(json_value["name"].as_str().expect("No Name"))
     };
     print_weather(&current_weather);
-
+    add_to_bashrc();
     Ok(())
 }
