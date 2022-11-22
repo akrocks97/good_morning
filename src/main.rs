@@ -41,7 +41,7 @@ fn add_to_bashrc() {
         .unwrap();
 
         let mut good_morning_executable = format!("{}", std::env::current_dir().unwrap().display());
-        good_morning_executable = String::from("cd ") + &good_morning_executable + "/target/release\n./good_morning \ncd $HOME";
+        good_morning_executable = String::from("CURR_DIR=$(PWD)\ncd ") + &good_morning_executable + "/target/release\n./good_morning \ncd $CURR_DIR";
         file.write_all(good_morning_executable.as_bytes()).expect("BASH RC write failex");
     }
 }
